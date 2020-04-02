@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -32,6 +33,7 @@ import com.tickets.service.AgentService;
   * @since   2020-03-20 
   */
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/rb")
 public class AgentController {
 	
@@ -167,7 +169,7 @@ public class AgentController {
 			LOGGER.info("Deleting the specified agent");
 			agentService.deleteAgent(deleteId);
 			HttpHeaders headers = new HttpHeaders();
-		    return new ResponseEntity<String>("Deleted the Agent", headers, HttpStatus.ACCEPTED);
+		    return new ResponseEntity<String>("Deleted the Agent", headers, HttpStatus.NO_CONTENT);
 		} catch (Exception e) {
 			LOGGER.info("Something went wrong while deleting the agent");
 			LOGGER.debug("Something went wrong in deleting the agent"+e.getMessage());

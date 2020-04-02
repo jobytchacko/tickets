@@ -218,10 +218,9 @@ public class AgentControllerTest {
     
     @Test
     public void deleteAgent() throws JsonProcessingException, Exception {
-    	
     	mockMvc.perform(delete("/rb/delete").param("deleteId", "5")
     	.contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isAccepted());
+        .andExpect(status().isNoContent());
     	
     	mockMvc.perform(delete("/rb/delete").param("deleteId", "0")
     	.contentType(MediaType.APPLICATION_JSON))
