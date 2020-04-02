@@ -9,6 +9,5 @@ public interface CommonValidator {
 	public CommonValidator isValidEmail(String parameter, String parameterName);
 	
 	public CommonValidator isValidID(long parameter, String parameterName);
-
 	
 }
