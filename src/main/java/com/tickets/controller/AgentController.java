@@ -34,7 +34,7 @@ import com.tickets.service.AgentService;
   */
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/rb")
+@RequestMapping(value = "/rb")
 public class AgentController {
 	
 	@Autowired
@@ -54,14 +54,25 @@ public class AgentController {
 	 */
     private static final Logger LOGGER=LoggerFactory.getLogger(AgentController.class);
 	
+	
 	/** 
 	  * This method is a dummy one to test application is running successfully  
 	  * It doens't accept any parameters 
 	  * @return string This returns "Hello World" as response 
 	  */
-	@RequestMapping("/hello")
+	@RequestMapping("/")
 	public String hello() {
-		return "Hello Worlds";
+		return "Hello RB";
+	}
+	
+	/** 
+	  * This method is a dummy one to test application is running successfully  
+	  * It doens't accept any parameters 
+	  * @return string This returns "Hello World" as response 
+	  */
+	@RequestMapping("/list/one")
+	public String hellorb() {
+		return "Hello /rb/list/one";
 	}
 	
 	/** 
