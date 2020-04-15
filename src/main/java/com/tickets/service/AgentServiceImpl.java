@@ -2,7 +2,13 @@ package com.tickets.service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.tickets.common.exceptions.InvalidFieldsException;
@@ -159,5 +165,16 @@ public class AgentServiceImpl implements AgentService {
     public void setAgentRepository(AgentRepository agentRepository) { 
         this.agentRepository = agentRepository;
     }
+
+	/**
+	 *This is method is to implement the pagination using spring data JPA
+	 *Yet to complete this with proper error and exception handling
+	 */
+	@Override
+	public Page<Agent> agentList(Integer pageNo, Integer pageSize, String sortBy) {
+		Pageable paging = new PageRequest(pageNo, pageSize, new Sort(sortBy));
+        Page<Agent> pagedResult = agentRepository.findAll(paging);
+		return pagedResult;
+	}
 
 }

@@ -1,12 +1,12 @@
 package com.tickets.controller;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
 /** 
  * This is HomeController class. It doesn't have any specific purpose
+ * This controller is mainly for demo purpose and to check the security part is working properly
  * Used to map the root / of the URL
  * Mostly used for testing different type of access
  * @author  Joby Chacko 
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
  * @since   2020-04-04 
  */
 @RestController
-@CrossOrigin(origins = "*")
 public class HomeController {
 	 
 	

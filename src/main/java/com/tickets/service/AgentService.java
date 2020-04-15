@@ -2,6 +2,8 @@ package com.tickets.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 import com.tickets.entity.Agent;
 import com.tickets.repository.AgentRepository;
 
@@ -17,6 +19,8 @@ public interface AgentService {
 	
 	public List<Agent> agentList();
 	
+	public Page<Agent> agentList(Integer pageNo, Integer pageSize, String sortBy);
+	
 	public Agent updateAgent(Agent agent);
 	
 	public void deleteAgent(long deleteId);
@@ -26,5 +30,7 @@ public interface AgentService {
 	public void setAgentRepository(AgentRepository agentRepository);
 	
 	public String agentName(String testName);
+	
+	
 	
 }

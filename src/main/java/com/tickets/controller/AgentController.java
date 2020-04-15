@@ -6,10 +6,16 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,6 +37,8 @@ import com.tickets.service.AgentService;
   * @author  Joby Chacko 
   * @version 1.0 
   * @since   2020-03-20 
+  * For http status codes def: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+  * For pagination https://github.com/vijjayy81/spring-boot-jpa-rest-demo-filter-paging-sorting
   */
 @RestController
 @CrossOrigin(origins = "*")
@@ -39,8 +47,6 @@ public class AgentController {
 	
 	@Autowired
 	private AgentService agentService;
-	@Autowired
-	private CommonValidator commonValidator;
 	private Agent agent;
 	private boolean validationStatus;
 	private List<Agent> agentList;
@@ -81,8 +87,8 @@ public class AgentController {
 	  * @param UriComponentsBuilder builder to buld the right url back in the response
 	  * @return ResponseEntity with created agent, headers and CREATED status. 
 	  */
-	@RequestMapping(value = "/create", method = RequestMethod.POST)
-	public ResponseEntity<Agent> createAgent(@RequestBody Agent agent, UriComponentsBuilder builder) {
+	@PostMapping("/agents")
+	public ResponseEntity<Agent> createAgent(@RequestBody Agent agent) {
 		try {
 			LOGGER.info("Inside the /create api");
 			validationStatus = false;
@@ -114,8 +120,8 @@ public class AgentController {
 	  * @param UriComponentsBuilder builder to buld the right url back in the response
 	  * @return ResponseEntity with created agent, headers and UPDATE status. 
 	  */
-	@RequestMapping(value = "/update", method = RequestMethod.PUT)
-	public ResponseEntity<Agent> updateAgent(@RequestBody Agent agent, UriComponentsBuilder builder) {
+	@PutMapping("/agents")
+	public ResponseEntity<Agent> updateAgent(@RequestBody Agent agent) {
 		try {
 			if(agent == null) {
 				throw new IllegalArgumentException();
@@ -144,14 +150,14 @@ public class AgentController {
 	  * @param UriComponentsBuilder builder to buld the right url back in the response
 	  * @return ResponseEntity with created agent, headers and DELETE status. 
 	  */
-	@RequestMapping(value = "/fetch", method = RequestMethod.GET)
-	public ResponseEntity<Agent> fetchAgent(@RequestParam long agentId, UriComponentsBuilder builder) {
+	@GetMapping("agents/{id}")
+	public ResponseEntity<Agent> fetchAgent(@PathVariable long id) {
 		try {
-			if(agentId == 0) {
+			if(id == 0) {
 				throw new IllegalArgumentException("Agent ID Id is not defined");
 			}
-			LOGGER.info("Fetching the agent with Agent Id: "+agentId);
-			agent = agentService.fetchAgent(agentId);
+			LOGGER.info("Fetching the agent with Agent Id: "+id);
+			agent = agentService.fetchAgent(id);
 			if(null == agent) {
 				throw new NotFoundException("Requested Agent is not available");
 			}
@@ -171,14 +177,14 @@ public class AgentController {
 	  * @param UriComponentsBuilder builder to buld the right url back in the response
 	  * @return ResponseEntity with created agent, headers and DELETE status. 
 	  */
-	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
-	public ResponseEntity<String> deleteAgent(@RequestParam long deleteId, UriComponentsBuilder builder) {
+	@DeleteMapping("agents/{id}")
+	public ResponseEntity<String> deleteAgent(@PathVariable long id) {
 		try {
-			if(deleteId == 0) {
+			if(id == 0) {
 				throw new IllegalArgumentException("Delete Id is not defined");
 			}			
 			LOGGER.info("Deleting the specified agent");
-			agentService.deleteAgent(deleteId);
+			agentService.deleteAgent(id);
 			HttpHeaders headers = new HttpHeaders();
 		    return new ResponseEntity<String>("Deleted the Agent", headers, HttpStatus.NO_CONTENT);
 		} catch (Exception e) {
@@ -193,19 +199,21 @@ public class AgentController {
 	  * @param RequestParam String firstName used to accept the searched first name
 	  * @return ResponseEntity with agents list, headers and OK status. 
 	  */
-	@RequestMapping(value = "/agents", method = RequestMethod.GET)
-	public ResponseEntity<List<Agent>> agentsByName(@RequestParam String firstName) {
+	@GetMapping("/agents")
+	public ResponseEntity<List<Agent>> agentsByName(@RequestParam(value = "firstName", required = false, defaultValue = "") String firstName) {
 		try {
+			System.out.println("First name to search is "+firstName);
 			LOGGER.info("Searchin Agents by Name");
-			if(commonValidator.notEmpty(firstName, "Search Criteria") == null) {
-				throw new IllegalArgumentException("Search criteria is not right");
+			agentList = null;
+			if(firstName.equals("")){
+				agentList = agentService.agentList();
+			} else {
+				agentList = agentService.agentListByName(firstName);
 			}
-			agentList = agentService.agentListByName(firstName);
 			if(null == agentList) {
 				throw new InternalServerErrorException("Something went wrong while fetching the agents by name");
 			}
-			headers = new HttpHeaders();
-	        return new ResponseEntity<List<Agent>>(agentList, headers, HttpStatus.OK);
+	        return new ResponseEntity<List<Agent>>(agentList, HttpStatus.OK);
 		} catch(Exception e) {
 			LOGGER.info("Something went wrong while searching the agent list");
 			LOGGER.debug("Something went wrong while searching the agent list"+e.getMessage());
@@ -214,25 +222,27 @@ public class AgentController {
 	}
 	
 	/** 
-	  * This method is used to handle GET request for agents list. Doesn't have any parameters
-	  * This method will return all data from agent list
+	  * This method is used to handle GET request for agents list for the like name search
+	  * @param RequestParam String firstName used to accept the searched first name
 	  * @return ResponseEntity with agents list, headers and OK status. 
 	  */
-	@RequestMapping(value = "/agentsList", method = RequestMethod.GET)
-	public ResponseEntity<List<Agent>> agentsList() {
+	@GetMapping("/agentsList")
+	public ResponseEntity<Page<Agent>> agentsList(@RequestParam(value = "pageNo", required = false, defaultValue = "0") String pageNo,
+													@RequestParam(value = "pageSize", required = false, defaultValue = "5") String pageSize,
+													@RequestParam(value = "sortBy", required = false, defaultValue = "firstName") String sortBy) {
 		try {
-			LOGGER.info("To List all agents");
-			agentList = agentService.agentList();
+			
+			Page<Agent> agentList = agentService.agentList(Integer.parseInt(pageNo), Integer.parseInt(pageSize), sortBy);
+		
 			if(null == agentList) {
-				LOGGER.info("Agent List returned was null");
-				throw new InternalServerErrorException("Something went wrong while acceesing the agents");
+				throw new InternalServerErrorException("Something went wrong while fetching the agents by name");
 			}
-	        headers = new HttpHeaders();
-	        return new ResponseEntity<List<Agent>>(agentList, headers, HttpStatus.OK);
+	        return new ResponseEntity<Page<Agent>>(agentList, HttpStatus.OK);
 		} catch(Exception e) {
-			LOGGER.info("Something went wrong while finding the agent list");
-			LOGGER.debug("Something went wrong while finding the agent list: "+e.getMessage());
+			LOGGER.info("Something went wrong while searching the agent list");
+			LOGGER.debug("Something went wrong while searching the agent list"+e.getMessage());
 			throw e;
 		}
 	}
+	
 }

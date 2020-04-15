@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /** 
  * <h1>Global exception controller to manage the exceptions in gloabl level</h1> 
@@ -15,10 +16,11 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
  * @author  Joby Chacko 
  * @version 1.0 
  * @since   2020-03-20 
+ * Look at ResponseEntityExceptionHandler to know more about the exceptions thrown
  */
 
 @ControllerAdvice
-public class GlobalExceptionsController {
+public class GlobalExceptionsController extends ResponseEntityExceptionHandler{
 	
 	/**
 	 * Logback supports ERROR, WARN, INFO, DEBUG, or TRACE as logging level. 
@@ -34,7 +36,7 @@ public class GlobalExceptionsController {
 	@ExceptionHandler(value = Exception.class)
 	public ResponseEntity<Object> exception(Exception exception) {
 		LOGGER.info("Exception at Global Exception:: "+exception.getMessage());
-	    return new ResponseEntity<>("Error in Processing request", HttpStatus.NOT_FOUND);
+	    return new ResponseEntity<>("Error in Processing request", HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
 	/**
@@ -45,7 +47,7 @@ public class GlobalExceptionsController {
 	@ExceptionHandler(value = InvalidFieldsException.class)
 	public ResponseEntity<Object> invalidFieldsException(InvalidFieldsException exception) {
 		LOGGER.info("GlobalExceptionsController....."+exception.wrongFields);
-	    return new ResponseEntity<>("Invalid Fields :"+(exception.wrongFields != null && !exception.wrongFields.isEmpty() ? StringUtils.join(exception.wrongFields) : null), HttpStatus.NOT_ACCEPTABLE);
+	    return new ResponseEntity<>("Invalid Fields :"+(exception.wrongFields != null && !exception.wrongFields.isEmpty() ? StringUtils.join(exception.wrongFields) : null), HttpStatus.BAD_REQUEST);
 	}
 	
 	/**
@@ -85,7 +87,7 @@ public class GlobalExceptionsController {
 	@ExceptionHandler(value = IllegalArgumentException.class)
 	public ResponseEntity<Object> illegalArgumentException(IllegalArgumentException exception) {
 		LOGGER.info("There are not accepatable content in your request"+exception.getMessage());
-	    return new ResponseEntity<>("Error in Processing request", HttpStatus.NOT_ACCEPTABLE);
+	    return new ResponseEntity<>("Error in Processing request", HttpStatus.BAD_REQUEST);
 	}
 	
 	/**
@@ -95,7 +97,7 @@ public class GlobalExceptionsController {
 	@ExceptionHandler(value = NumberFormatException.class)
 	public ResponseEntity<Object> numberFormatException(NumberFormatException exception) {
 		LOGGER.info("There are not accepatable content in your request"+exception.getMessage());
-	    return new ResponseEntity<>("Error in Processing request", HttpStatus.NOT_ACCEPTABLE);
+	    return new ResponseEntity<>("Error in Processing request", HttpStatus.BAD_REQUEST);
 	}
 	
 	/**
@@ -105,7 +107,7 @@ public class GlobalExceptionsController {
 	@ExceptionHandler(value = MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<Object> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException exception) {
 		LOGGER.info("There are not accepatable content in your request: "+exception.getMessage());
-	    return new ResponseEntity<>("Error in Processing request", HttpStatus.NOT_ACCEPTABLE);
+	    return new ResponseEntity<>("Error in Processing request", HttpStatus.BAD_REQUEST);
 	}
 	
 	/**
