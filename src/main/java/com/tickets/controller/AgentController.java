@@ -41,7 +41,6 @@ import com.tickets.service.AgentService;
   * For pagination https://github.com/vijjayy81/spring-boot-jpa-rest-demo-filter-paging-sorting
   */
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping(value = "/rb")
 public class AgentController {
 	
@@ -79,6 +78,18 @@ public class AgentController {
 	@RequestMapping("/list/one")
 	public String hellorb() {
 		return "Hello /rb/list/one";
+	}
+	
+	@PostMapping("/tests")
+	public Agent createsAgent() {
+			
+		return new Agent();
+	}
+	
+	@GetMapping("/testsget")
+	public Agent fetchAgent() {
+			
+		return new Agent();
 	}
 	
 	/** 
